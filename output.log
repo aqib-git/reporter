@@ -1,0 +1,10 @@
+[2021-12-05][15:05:41][reqwest::connect][DEBUG] starting new connection: https://app.leadgenapp.io/
+[2021-12-05][15:05:42][reqwest::async_impl::client][DEBUG] response '200 OK' for https://app.leadgenapp.io/
+[2021-12-05][15:05:46][reporter][INFO] Email sent successfully!
+[2021-12-05][15:05:46][reporter][INFO] App is down :(
+[2021-12-05][15:05:47][reqwest::connect][DEBUG] starting new connection: https://app.leadgenapp.io/
+[2021-12-05][15:05:47][reqwest::async_impl::client][DEBUG] response '200 OK' for https://app.leadgenapp.io/
+[2021-12-05][15:05:47][reporter][INFO] App is down :(
+[2021-12-05][15:05:48][reqwest::connect][DEBUG] starting new connection: https://app.leadgenapp.io/
+[2021-12-05][15:05:49][reqwest::async_impl::client][DEBUG] response '200 OK' for https://app.leadgenapp.io/
+[2021-12-05][15:05:49][reporter][INFO] App is down :(
