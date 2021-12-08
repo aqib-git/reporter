@@ -3,7 +3,7 @@ use dotenv::dotenv;
 use log;
 use chrono;
 use std::{thread, time::Duration};
-use reporter::{Reporter, ReporterKind, EmailReporter};
+use reporters::{Reporter, ReporterKind, EmailReporter};
 
 fn setup_logger() -> Result<(), fern::InitError> {
     fern::Dispatch::new()
