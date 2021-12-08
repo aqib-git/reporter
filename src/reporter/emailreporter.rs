@@ -1,72 +1,77 @@
 use std::collections::HashMap;
-use std::env;
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
 
 pub struct EmailReporter {
-    to: String,
-    from: String,
-    subject: String,
-    body: String,
-    smtp_username: String,
-    smtp_password: String,
-    reported_status: HashMap<String, bool>
+    to: Option<String>,
+    from: Option<String>,
+    subject: Option<String>,
+    body: Option<String>,
+    smtp_username: Option<String>,
+    smtp_password: Option<String>,
+    reported_status: HashMap<String, bool>,
+    report_once: bool
 }
 
 impl EmailReporter {
-    pub fn new(
-        mut to: Option<String>,
-        mut from: Option<String>,
-        mut subject: Option<String>,
-        mut body: Option<String>,
-        mut smtp_username: Option<String>,
-        mut smtp_password: Option<String>
-    ) -> EmailReporter {
-        if let None = from {
-            from = Some(env::var("REPORTER_MAIL_FROM")
-                .expect("REPORTER_MAIL_FROM env not set!"));
-        }
-
-        if let None = to {
-            to = Some(env::var("REPORTER_MAIL_TO")
-                .expect("REPORTER_MAIL_TO env not set!"));
-        }
-
-        if let None = subject {
-            subject = Some(env::var("REPORTER_MAIL_SUBJECT")
-                .expect("REPORTER_MAIL_SUBJECT env not set!"));
-        }
-
-        if let None = body {
-            body = Some(String::from("Error world!"));
-        }
-
-        if let None = smtp_username {
-            smtp_username = Some(env::var("REPORTER_MAIL_SMTP_USERNAME")
-                .expect("REPORTER_MAIL_SMTP_USERNAME env not set!"));
-        }
-
-        if let None = smtp_password {
-            smtp_password = Some(env::var("REPORTER_MAIL_SMTP_PASSWORD")
-                .expect("REPORTER_MAIL_SMTP_PASSWORD env not set!"));
-        }
-
+    pub fn new() -> EmailReporter {
         let mut reported_status = HashMap::new();
         let reported_day: String = chrono::Local::now().format("[%Y-%m-%d]").to_string();
         reported_status.insert(reported_day, false);
 
         EmailReporter {
-            to: to.unwrap(),
-            from: from.unwrap(),
-            subject: subject.unwrap(),
-            body: body.unwrap(),
-            smtp_username: smtp_username.unwrap(),
-            smtp_password: smtp_password.unwrap(),
-            reported_status
+            to: None,
+            from: None,
+            subject: None,
+            body: None,
+            smtp_username: None,
+            smtp_password: None,
+            reported_status,
+            report_once: true
         }
     }
 
+    pub fn to(&mut self, to: Option<String>) -> &mut EmailReporter {
+        self.to = to;
+
+        return self;
+    }
+
+    pub fn from(&mut self, from: Option<String>) -> &mut EmailReporter {
+        self.from = from;
+
+        return self;
+    }
+
+    pub fn subject(&mut self, subject: Option<String>) -> &mut EmailReporter {
+        self.subject = subject;
+
+        return self;
+    }
+
+    pub fn body(&mut self, body: Option<String>) -> &mut EmailReporter {
+        self.body = body;
+
+        return self;
+    }
+
+    pub fn smtp_username(&mut self, smtp_username: Option<String>) -> &mut EmailReporter {
+        self.smtp_username = smtp_username;
+
+        return self;
+    }
+
+    pub fn smtp_password(&mut self, smtp_password: Option<String>) -> &mut EmailReporter {
+        self.smtp_password = smtp_password;
+
+        return self;
+    }
+
     fn already_reported(&mut self) -> bool {
+        if self.report_once {
+            return false;
+        }
+
         let reported_day: String = chrono::Local::now().format("[%Y-%m-%d]").to_string();
         if self.reported_status.contains_key(&reported_day) {
             return *self.reported_status.get(&reported_day).unwrap();
@@ -81,13 +86,16 @@ impl EmailReporter {
         }
 
         let email = Message::builder()
-            .from(self.from.parse().unwrap())
-            .to(self.to.parse().unwrap())
-            .subject(&self.subject[..])
-            .body(String::from(&self.body[..]))
+            .from(self.from.clone().unwrap().as_str().parse().unwrap())
+            .to(self.to.clone().unwrap().as_str().parse().unwrap())
+            .subject(self.subject.clone().unwrap())
+            .body(self.body.clone().unwrap())
             .unwrap();
 
-        let creds = Credentials::new(self.smtp_username.to_string(), self.smtp_password.to_string());
+        let creds = Credentials::new(
+            self.smtp_username.clone().unwrap().as_str().parse().unwrap(),
+            self.smtp_password.clone().unwrap().as_str().parse().unwrap()
+        );
 
         let mailer = SmtpTransport::relay("smtp.gmail.com")
             .unwrap()
@@ -95,8 +103,8 @@ impl EmailReporter {
             .build();
 
         match mailer.send(&email) {
-            Ok(_) => log::info!("Email sent successfully!"),
-            Err(e) => log::info!("Could not send email: {:?}", e),
+            Ok(_) => println!("Email sent successfully!"),
+            Err(e) => println!("Could not send email: {:?}", e),
         }
 
         let reported_day: String = chrono::Local::now().format("[%Y-%m-%d]").to_string();
