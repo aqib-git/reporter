@@ -1,11 +1,9 @@
-mod reporter;
-
 use std::env;
 use dotenv::dotenv;
 use log;
 use chrono;
 use std::{thread, time::Duration};
-use crate::reporter::{Reporter, ReporterKind, EmailReporter};
+use reporter::{Reporter, ReporterKind, EmailReporter};
 
 fn setup_logger() -> Result<(), fern::InitError> {
     fern::Dispatch::new()
